@@ -10,6 +10,7 @@ import staffRoutes from "./routes/staffRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import barcodeRoutes from "./routes/barcodeRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 const app = express();
 
@@ -34,3 +35,5 @@ app.get("/", (req, res) => {
 app.listen(process.env.PORT, () => {
     console.log(`Server running on port ${process.env.PORT}`);
 });
+// dashboard
+app.use("/api/dashboard", dashboardRoutes);
