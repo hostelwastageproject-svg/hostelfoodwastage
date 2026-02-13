@@ -11,6 +11,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import barcodeRoutes from "./routes/barcodeRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
+import scanRoutes from "./routes/scanRoutes.js";
+
 
 const app = express();
 
@@ -37,3 +39,5 @@ app.listen(process.env.PORT, () => {
 });
 // dashboard
 app.use("/api/dashboard", dashboardRoutes);
+//scan token 
+app.use("/api/scan", scanRoutes);
