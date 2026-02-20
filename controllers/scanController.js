@@ -1,15 +1,26 @@
 import { sql } from "../db.js";
 
 export const scanToken = async (req, res) => {
-  const { token } = req.body;
+  const { token_number } = req.body; // barcode sends token_number
 
   try {
-    // 1️⃣ Find booking by token
+    if (!token_number) {
+      return res.json({
+        status: "error",
+        message: "token_number is required."
+      });
+    }
+
+    // 1️⃣ Find booking by token_number
     const booking = await sql`
-      SELECT b.*, s.name AS student_name, s.reg_no
+      SELECT 
+        b.*, 
+        s.name AS student_name, 
+        s.reg_no
       FROM bookings b
-      JOIN students s ON b.student_id = s.id
-      WHERE b.token = ${token}
+      JOIN students s 
+        ON b.student_id = s.id
+      WHERE b.token_number = ${token_number}
     `;
 
     if (booking.length === 0) {
@@ -21,7 +32,7 @@ export const scanToken = async (req, res) => {
 
     const record = booking[0];
 
-    // 2️⃣ Check if token already used
+    // 2️⃣ Check if token already scanned
     const previousScan = await sql`
       SELECT * FROM meal_attendance
       WHERE booking_id = ${record.id}
@@ -40,13 +51,13 @@ export const scanToken = async (req, res) => {
       });
     }
 
-    // 3️⃣ First-time scan → Insert into attendance log
+    // 3️⃣ Insert attendance on first scan
     await sql`
       INSERT INTO meal_attendance (booking_id, status)
       VALUES (${record.id}, 'valid')
     `;
 
-    // 4️⃣ Return success
+    // 4️⃣ Successful scan
     return res.json({
       status: "valid",
       message: "Meal attendance recorded successfully.",

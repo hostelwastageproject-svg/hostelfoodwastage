@@ -12,6 +12,7 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 import barcodeRoutes from "./routes/barcodeRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
+import attendanceRoutes from "./routes/attendanceRoutes.js";
 
 
 const app = express();
@@ -41,3 +42,5 @@ app.listen(process.env.PORT, () => {
 app.use("/api/dashboard", dashboardRoutes);
 //scan token 
 app.use("/api/scan", scanRoutes);
+//attendance 
+app.use("/api/attendance", attendanceRoutes);
