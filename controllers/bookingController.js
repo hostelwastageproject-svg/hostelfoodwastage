@@ -1,20 +1,38 @@
 import { sql } from "../db.js";
+import { generateTokenPDF } from "../utils/pdfGenerator.js";
 
 // ===============================
 // DAILY / PER-MEAL BOOKING
 // ===============================
 export const createBooking = async (req, res) => {
-    const { student_id, reg_no, food_pref, meal_type, date } = req.body;
+    const { student_id, reg_no, food_pref, meal_type } = req.body;
 
     try {
-        if (!meal_type) {
-            return res.status(400).json({ message: "meal_type is required" });
+        if (!student_id || !reg_no || !meal_type) {
+            return res.status(400).json({ message: "Missing required fields" });
         }
 
-        // Check student
+        // 🔥 MEAL CUTOFF TIME (10:00 PM)
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinutes = now.getMinutes();
+        const currentTimeInMinutes = currentHour * 60 + currentMinutes;
+        const cutoffTimeInMinutes = 22 * 60; // 10 PM
+
+        if (currentTimeInMinutes >= cutoffTimeInMinutes) {
+            return res.status(400).json({
+                message: "Booking closed. Registration cutoff time is 10:00 PM."
+            });
+        }
+
+        // 🔥 Automatically set booking date as TODAY
+        const today = new Date().toLocaleDateString("en-CA");
+
+        // 1️⃣ Check student
         const student = await sql`
             SELECT * FROM students WHERE id = ${student_id}
         `;
+
         if (student.length === 0) {
             return res.status(400).json({ message: "Student does not exist" });
         }
@@ -23,32 +41,56 @@ export const createBooking = async (req, res) => {
             return res.status(400).json({ message: "Invalid student_id or reg_no" });
         }
 
-        // Check duplicate
+        // 2️⃣ Prevent duplicate booking
         const exists = await sql`
             SELECT * FROM bookings
             WHERE student_id = ${student_id}
-            AND date = ${date}
+            AND date = ${today}
             AND meal_type = ${meal_type}
         `;
+
         if (exists.length > 0) {
-            return res.status(400).json({ message: "Booking already exists for this date and meal" });
+            return res.status(400).json({
+                message: "Booking already exists for today"
+            });
         }
 
-        // Create booking
+        // 3️⃣ Generate token
+        const token_number = `TOKEN-${student_id}-${Date.now()}`;
+
+        // 4️⃣ Insert booking
         const newBooking = await sql`
-            INSERT INTO bookings (student_id, reg_no, food_pref, meal_type, date, status)
-            VALUES (${student_id}, ${reg_no}, ${food_pref}, ${meal_type}, ${date}, 'active')
+            INSERT INTO bookings 
+            (student_id, reg_no, food_pref, meal_type, date, status, token_number)
+            VALUES 
+            (${student_id}, ${reg_no}, ${food_pref}, ${meal_type}, ${today}, 'active', ${token_number})
             RETURNING *
         `;
 
-        res.status(201).json(newBooking[0]);
+        const booking = newBooking[0];
+
+        // 5️⃣ Generate PDF
+        const pdfPath = await generateTokenPDF({
+            student_name: student[0].name,
+            reg_no: reg_no,
+            meal_type: meal_type,
+            food_pref: food_pref,
+            booking_date: today,
+            booking_time: new Date().toLocaleTimeString(),
+            token_number: token_number
+        });
+
+        return res.status(201).json({
+            message: "Booking created successfully",
+            booking,
+            token_pdf: pdfPath
+        });
 
     } catch (error) {
         console.error("CREATE BOOKING ERROR:", error);
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
-
 // ===============================
 // BULK BOOKING (1–6 MONTHS)
 // ===============================
@@ -56,10 +98,14 @@ export const bulkBooking = async (req, res) => {
     const { student_id, reg_no, food_pref, meal_type, start_date, end_date } = req.body;
 
     try {
-        // Validate student
+        if (!student_id || !reg_no || !meal_type || !start_date || !end_date) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+
         const student = await sql`
             SELECT * FROM students WHERE id = ${student_id}
         `;
+
         if (student.length === 0) {
             return res.status(400).json({ message: "Student does not exist" });
         }
@@ -68,18 +114,11 @@ export const bulkBooking = async (req, res) => {
             return res.status(400).json({ message: "Invalid reg_no" });
         }
 
-        // Validate date range
         const start = new Date(start_date);
         const end = new Date(end_date);
 
         if (isNaN(start) || isNaN(end) || start > end) {
             return res.status(400).json({ message: "Invalid date range" });
-        }
-
-        // 6-month limit
-        const sixMonths = 1000 * 60 * 60 * 24 * 30 * 6;
-        if (end - start > sixMonths) {
-            return res.status(400).json({ message: "Cannot book more than 6 months" });
         }
 
         let created = [];
@@ -89,7 +128,6 @@ export const bulkBooking = async (req, res) => {
         while (current <= end) {
             const dateStr = current.toISOString().split("T")[0];
 
-            // Check duplicate
             const exists = await sql`
                 SELECT * FROM bookings
                 WHERE student_id = ${student_id}
@@ -100,28 +138,31 @@ export const bulkBooking = async (req, res) => {
             if (exists.length > 0) {
                 skipped.push(dateStr);
             } else {
+                const token_number = `TOKEN-${student_id}-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+
                 const booking = await sql`
-                    INSERT INTO bookings (student_id, reg_no, food_pref, meal_type, date, status)
-                    VALUES (${student_id}, ${reg_no}, ${food_pref}, ${meal_type}, ${dateStr}, 'active')
+                    INSERT INTO bookings
+                    (student_id, reg_no, food_pref, meal_type, date, status, token_number)
+                    VALUES
+                    (${student_id}, ${reg_no}, ${food_pref}, ${meal_type}, ${dateStr}, 'active', ${token_number})
                     RETURNING *
                 `;
+
                 created.push(booking[0]);
             }
 
             current.setDate(current.getDate() + 1);
         }
 
-        res.json({
+        return res.json({
             message: "Bulk booking completed",
             created_count: created.length,
-            skipped_count: skipped.length,
-            created,
-            skipped
+            skipped_count: skipped.length
         });
 
     } catch (error) {
         console.error("BULK BOOKING ERROR:", error);
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
@@ -136,11 +177,9 @@ export const getAllBookings = async (req, res) => {
             JOIN students s ON b.student_id = s.id
             ORDER BY b.id DESC
         `;
-        res.json(rows);
-
+        return res.json(rows);
     } catch (error) {
-        console.error("FETCH BOOKINGS ERROR:", error);
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
@@ -156,11 +195,9 @@ export const getStudentBookings = async (req, res) => {
             WHERE student_id = ${student_id}
             ORDER BY id DESC
         `;
-        res.json(rows);
-
+        return res.json(rows);
     } catch (error) {
-        console.error("FETCH STUDENT BOOKINGS ERROR:", error);
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
@@ -183,11 +220,9 @@ export const updateBookingStatus = async (req, res) => {
             return res.status(404).json({ message: "Booking not found" });
         }
 
-        res.json(updated[0]);
-
+        return res.json(updated[0]);
     } catch (error) {
-        console.error("UPDATE BOOKING ERROR:", error);
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
@@ -202,20 +237,19 @@ export const deleteBooking = async (req, res) => {
             DELETE FROM bookings WHERE id = ${id}
             RETURNING *
         `;
+
         if (deleted.length === 0) {
             return res.status(404).json({ message: "Booking not found" });
         }
 
-        res.json({ message: "Booking deleted successfully" });
-
+        return res.json({ message: "Booking deleted successfully" });
     } catch (error) {
-        console.error("DELETE BOOKING ERROR:", error);
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
 // ===============================
-// CANCEL BOOKING (24-HOUR RULE)
+// CANCEL BOOKING
 // ===============================
 export const cancelBooking = async (req, res) => {
     const { id } = req.params;
@@ -233,26 +267,15 @@ export const cancelBooking = async (req, res) => {
             return res.status(400).json({ message: "Only active bookings can be cancelled" });
         }
 
-        const bookingDate = new Date(booking[0].date);
-        const now = new Date();
-        const hoursDiff = (bookingDate - now) / (1000 * 60 * 60);
-
-        if (hoursDiff < 24) {
-            return res.status(400).json({
-                message: "Cannot cancel booking less than 24 hours before meal"
-            });
-        }
-
         await sql`
             UPDATE bookings
             SET status = 'cancelled'
             WHERE id = ${id}
         `;
 
-        res.json({ message: "Booking cancelled successfully" });
+        return res.json({ message: "Booking cancelled successfully" });
 
     } catch (error) {
-        console.error("CANCEL BOOKING ERROR:", error);
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };

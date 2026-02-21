@@ -13,6 +13,8 @@ import barcodeRoutes from "./routes/barcodeRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
 import attendanceRoutes from "./routes/attendanceRoutes.js";
+import menuRoutes from "./routes/menuRoutes.js";
+import noticeRoutes from "./routes/noticeRoutes.js";
 
 
 const app = express();
@@ -44,3 +46,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/scan", scanRoutes);
 //attendance 
 app.use("/api/attendance", attendanceRoutes);
+//menu 
+app.use("/api/uploads", express.static("uploads"));
+app.use("/api/menu", menuRoutes);
+app.use("/api/notices", noticeRoutes);

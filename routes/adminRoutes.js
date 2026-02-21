@@ -11,6 +11,7 @@ import {
 } from "../controllers/adminController.js";
 
 import { adminAuth } from "../middleware/adminAuth.js";
+import { getAdminDashboard } from "../controllers/adminController.js";
 
 const router = express.Router();
 
@@ -42,5 +43,17 @@ router.post(
     upload.single("file"),     // "file" is the form field name
     uploadAllowedEmails
 );
+import {
+  // ...your existing imports
+  getAttendancePresent,
+  getAttendanceAbsent,
+  getAttendanceSummary
+} from "../controllers/adminController.js";
+
+// Attendance routes (Admin only)
+router.get("/attendance", adminAuth, getAttendancePresent);
+router.get("/attendance/absent", adminAuth, getAttendanceAbsent);
+router.get("/attendance/summary", adminAuth, getAttendanceSummary);
+router.get("/dashboard", adminAuth, getAdminDashboard);
 
 export default router;
