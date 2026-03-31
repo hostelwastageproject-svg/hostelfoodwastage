@@ -5,11 +5,13 @@ import {
     getAllStudents 
 } from "../controllers/studentController.js";
 
+import authMiddleware from "../middleware/authMiddleware.js";
+
 const router = express.Router();
 
 router.post("/register", registerStudent);
 router.post("/login", loginStudent);
-router.post("/", getAllStudents);
+router.get("/", authMiddleware, getAllStudents);
 
 export default router;
 

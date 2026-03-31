@@ -1,0 +1,4 @@
+controllers/scanController.js
+routes/adminRoutes.js
+routes/bookingRoutes.js
+routes/staffRoutes.js

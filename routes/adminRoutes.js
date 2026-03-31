@@ -10,8 +10,12 @@ import {
     uploadAllowedEmails
 } from "../controllers/adminController.js";
 
+<<<<<<< HEAD
+import authMiddleware from "../middleware/authMiddleware.js";
+=======
 import { adminAuth } from "../middleware/adminAuth.js";
 import { getAdminDashboard } from "../controllers/adminController.js";
+>>>>>>> 545f0f7d2cb36fd1875f3d231f9dda8b0a20d819
 
 const router = express.Router();
 
@@ -25,6 +29,10 @@ const upload = multer({
 // ==============================
 router.post("/register", registerAdmin);
 router.post("/login", loginAdmin);
+<<<<<<< HEAD
+router.get("/", authMiddleware, getAllAdmins);
+router.delete("/:id", authMiddleware, deleteAdmin);
+=======
 
 router.get("/all", adminAuth, getAllAdmins);
 router.delete("/:id", adminAuth, deleteAdmin);
@@ -55,5 +63,6 @@ router.get("/attendance", adminAuth, getAttendancePresent);
 router.get("/attendance/absent", adminAuth, getAttendanceAbsent);
 router.get("/attendance/summary", adminAuth, getAttendanceSummary);
 router.get("/dashboard", adminAuth, getAdminDashboard);
+>>>>>>> 545f0f7d2cb36fd1875f3d231f9dda8b0a20d819
 
 export default router;

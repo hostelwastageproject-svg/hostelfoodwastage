@@ -18,9 +18,14 @@ export const scanToken = async (req, res) => {
         s.name AS student_name, 
         s.reg_no
       FROM bookings b
+<<<<<<< HEAD
+      JOIN students s ON b.student_id = s.id
+      WHERE b.token_number = ${token}
+=======
       JOIN students s 
         ON b.student_id = s.id
       WHERE b.token_number = ${token_number}
+>>>>>>> 545f0f7d2cb36fd1875f3d231f9dda8b0a20d819
     `;
 
     if (booking.length === 0) {
