@@ -15,7 +15,9 @@ import scanRoutes from "./routes/scanRoutes.js";
 import attendanceRoutes from "./routes/attendanceRoutes.js";
 import menuRoutes from "./routes/menuRoutes.js";
 import noticeRoutes from "./routes/noticeRoutes.js";
-
+import feedbackRoutes from "./routes/feedbackRoutes.js";
+import checkinRoutes from "./routes/checkinRoutes.js";
+import studentStatsRoutes from "./routes/studentStatsRoutes.js";
 
 const app = express();
 
@@ -50,3 +52,6 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/uploads", express.static("uploads"));
 app.use("/api/menu", menuRoutes);
 app.use("/api/notices", noticeRoutes);
+app.use("/api/feedback", feedbackRoutes);
+app.use("/api/checkin", checkinRoutes);
+app.use("/api/student-stats", studentStatsRoutes);

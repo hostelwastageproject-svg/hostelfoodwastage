@@ -13,13 +13,10 @@ import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-<<<<<<< HEAD
+// Route protection
 router.use(authMiddleware);
 
-// Regular booking
-=======
 // Create booking
->>>>>>> 545f0f7d2cb36fd1875f3d231f9dda8b0a20d819
 router.post("/create", createBooking);
 
 // Bulk booking

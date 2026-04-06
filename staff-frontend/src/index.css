@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Rich Aesthetics: Deep green palette */
+  --brand-primary: #1B5E20; /* Darker vibrant green */
+  --brand-primary-hover: #144d18;
+  --brand-secondary: #4CAF50;
+  --brand-light: rgba(76, 175, 80, 0.1);
+  --brand-gradient: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
+  
+  --bg-app: #f0fdf4; /* Very subtle green tint to background */
+  --bg-surface: rgba(255, 255, 255, 0.85); /* For glassmorphism */
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  
+  --border-color: rgba(203, 213, 225, 0.5);
+  
+  --danger: #ef4444;
+  --success: #22c55e;
+
+  --shadow-sm: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 20px rgba(76, 175, 80, 0.3);
+  
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-app);
+  background-image: radial-gradient(circle at top right, rgba(76, 175, 80, 0.1) 0%, transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(76, 175, 80, 0.05) 0%, transparent 40%);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+input, select { font-family: inherit; }
+
+/* Typography */
+h1 { font-size: 28px; font-weight: 700; color: var(--brand-primary); letter-spacing: -0.5px; }
+h2 { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+
+/* Premium Glassmorphism Card */
+.card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+  transition: var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+/* Vibrant Action Buttons */
+.btn-primary {
+  background: var(--brand-gradient);
+  color: white;
+  padding: 14px 28px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+}
+
+/* Layout System */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 280px;
+  background: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-brand {
+  padding: 32px 24px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-nav {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.nav-link:hover {
+  background: var(--brand-light);
+  color: var(--brand-primary);
+  transform: translateX(4px);
+}
+
+.nav-link.active {
+  background: var(--brand-gradient);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  height: 80px;
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+}
+
+.page-container {
+  padding: 0 40px 40px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Scanner Overlay Specific */
+.scanner-container {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background: black;
+  position: relative;
+}
+
+.scan-pulse {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 200px; height: 2px;
+  background: var(--brand-secondary);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 15px 2px var(--brand-secondary);
+  animation: scanAnim 2s infinite linear;
+}
+
+@keyframes scanAnim {
+  0% { top: 10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 90%; opacity: 0; }
+}

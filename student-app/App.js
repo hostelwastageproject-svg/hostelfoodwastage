@@ -15,10 +15,11 @@ import { COLORS } from './src/theme';
 
 import LoginScreen from './src/Auth/LoginScreen';
 import HomeScreen from './src/Dashboard/HomeScreen';
-import BookingScreen from './src/Booking/BookingScreen';
+import CheckinScreen from './src/Booking/CheckinScreen';
 import BarcodeScreen from './src/Barcode/BarcodeScreen';
 import ProfileScreen from './src/Profile/ProfileScreen';
 import ComplaintScreen from './src/Complaint/ComplaintScreen';
+import FeedbackScreen from './src/Feedback/FeedbackScreen';
 
 import { View, ActivityIndicator } from 'react-native';
 
@@ -41,7 +42,7 @@ function TabNavigator() {
         tabBarIcon: ({ color, size }) => {
           let icon;
           if (route.name === 'Home') icon = <Home color={color} size={size} />;
-          else if (route.name === 'Book') icon = <Utensils color={color} size={size} />;
+          else if (route.name === 'Checkin') icon = <Utensils color={color} size={size} />;
           else if (route.name === 'Barcode') icon = <QrCode color={color} size={size} />;
           else if (route.name === 'Profile') icon = <User color={color} size={size} />;
           return icon;
@@ -49,17 +50,20 @@ function TabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Dashboard' }} />
-      <Tab.Screen name="Book" component={BookingScreen} />
+      <Tab.Screen name="Checkin" component={CheckinScreen} />
       <Tab.Screen name="Barcode" component={BarcodeScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
 
+import { setupPushNotifications } from './src/utils/notifications';
+
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
+    setupPushNotifications();
     async function loadFonts() {
       await Font.loadAsync({
         Inter_400Regular,
@@ -89,6 +93,7 @@ export default function App() {
         <Stack.Screen name="Complaint" component={ComplaintScreen} options={{ headerShown: true, title: 'Complaints', headerTitleStyle: { fontFamily: 'Inter_600SemiBold' } }} />
         <Stack.Screen name="Menu" component={HomeScreen} options={{ headerShown: true, title: 'Menu PDF (Mock)' }} />
         <Stack.Screen name="Notices" component={HomeScreen} options={{ headerShown: true, title: 'Notice Board (Mock)' }} />
+        <Stack.Screen name="Feedback" component={FeedbackScreen} options={{ headerShown: true, title: 'Meal Feedback' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

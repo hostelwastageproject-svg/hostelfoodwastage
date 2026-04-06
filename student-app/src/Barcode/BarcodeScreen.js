@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, SafeAreaView } from 'react-native';
 import { COLORS, globalStyles, SIZES } from '../theme';
-import { Download } from 'lucide-react-native';
+import QRCode from 'react-native-qrcode-svg';
 
 export default function BarcodeScreen() {
   return (
@@ -10,29 +10,27 @@ export default function BarcodeScreen() {
         
         <View style={[globalStyles.card, { width: '100%', alignItems: 'center', paddingVertical: 40 }]}>
           <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 20, marginBottom: 8, color: COLORS.primary }}>
-            Lunch Meal Token
+            Digital Student ID
           </Text>
-          <Text style={{ fontFamily: 'Inter_500Medium', color: COLORS.textSecondary, marginBottom: 32 }}>
-            Valid for: Today, 12:30 PM - 2:00 PM
+          <Text style={{ fontFamily: 'Inter_500Medium', color: COLORS.textSecondary, marginBottom: 32, textAlign: 'center' }}>
+            Scan this code at the kitchen.{"\n"}Valid for all meals.
           </Text>
 
-          {/* Placeholder for actual Barcode. Since we don't have react-native-qrcode-svg installed, mock it */}
-          <View style={{ width: 200, height: 200, backgroundColor: COLORS.textPrimary, padding: 8, marginBottom: 24, justifyContent: 'center', alignItems: 'center' }}>
-             <View style={{ width: '100%', height: '100%', backgroundColor: COLORS.white, padding: 16 }}>
-               <View style={{ width: '100%', height: '100%', borderWidth: 16, borderStyle: 'dashed', borderColor: COLORS.textPrimary }} />
-             </View>
+          {/* Actual Barcode Generator */}
+          <View style={{ marginBottom: 32, padding: 16, backgroundColor: '#FFFFFF', borderRadius: 16, elevation: 4 }}>
+             <QRCode
+               value="KLU210003291"
+               size={200}
+               color={COLORS.textPrimary}
+               backgroundColor="#FFFFFF"
+             />
           </View>
 
-          <View style={{ backgroundColor: COLORS.background, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8, marginBottom: 32 }}>
+          <View style={{ backgroundColor: COLORS.background, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8 }}>
             <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 24, letterSpacing: 4, color: COLORS.textPrimary }}>
-              TK-LUN-084
+              KLU210003291
             </Text>
           </View>
-
-          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12 }}>
-            <Download color={COLORS.primary} size={20} />
-            <Text style={{ fontFamily: 'Inter_600SemiBold', color: COLORS.primary }}>Download Pass</Text>
-          </TouchableOpacity>
         </View>
 
       </View>
