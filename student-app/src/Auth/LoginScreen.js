@@ -1,15 +1,41 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { COLORS, globalStyles, SIZES, SHADOWS } from '../theme';
 import { Utensils } from 'lucide-react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Basic mock authentication routing per constraints
-    navigation.replace('MainTabs');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // NOTE: Using localhost because we are deploying to Web based on our plan.
+      // If testing on mobile emulator, replace localhost with your machine's IP.
+      const res = await axios.post('http://10.72.224.188:5000/api/students/login', {
+        email,
+        password
+      });
+
+      if (res.data.token) {
+        await AsyncStorage.setItem('studentToken', res.data.token);
+        await AsyncStorage.setItem('studentDetails', JSON.stringify(res.data.student));
+        navigation.replace('MainTabs');
+      }
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Login failed. Check your connection.';
+      Alert.alert('Login Failed', msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,11 +81,15 @@ export default function LoginScreen({ navigation }) {
             <TouchableOpacity 
               style={[globalStyles.buttonPrimary, { marginTop: 8 }]} 
               onPress={handleLogin}
+              disabled={loading}
             >
-              <Text style={globalStyles.buttonText}>Login</Text>
+              <Text style={globalStyles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={{ alignItems: 'center', marginTop: 24 }}>
+            <TouchableOpacity 
+              style={{ alignItems: 'center', marginTop: 24 }}
+              onPress={() => navigation.navigate('Register')}
+            >
               <Text style={{ fontFamily: 'Inter_500Medium', color: COLORS.primary, fontSize: 14 }}>
                 Don't have an account? Register
               </Text>

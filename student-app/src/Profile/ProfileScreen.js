@@ -1,17 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { COLORS, globalStyles, SIZES } from '../theme';
 import { User, Mail, Shield, LogOut } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen({ navigation }) {
+  const [student, setStudent] = useState({
+    name: 'Student',
+    email: 'Loading...',
+    reg_no: 'Loading...'
+  });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const details = await AsyncStorage.getItem('studentDetails');
+      if (details) {
+        setStudent(JSON.parse(details));
+      }
+    };
+    loadProfile();
+  }, []);
+
   const profileDetails = [
-    { label: 'Name', value: 'Rahul Sharma', icon: User },
-    { label: 'Email', value: 'rahul.s@student.edu', icon: Mail },
-    { label: 'Registration No', value: 'REG-2024-089', icon: Shield },
+    { label: 'Name', value: student.name, icon: User },
+    { label: 'Email', value: student.email, icon: Mail },
+    { label: 'Registration No', value: student.reg_no, icon: Shield },
   ];
 
-  const handleLogout = () => {
-    // Clear tokens here in the future
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('studentToken');
+    await AsyncStorage.removeItem('studentDetails');
     navigation.replace('Login');
   }
 
@@ -21,9 +39,11 @@ export default function ProfileScreen({ navigation }) {
         
         <View style={{ alignItems: 'center', marginVertical: 32 }}>
           <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: COLORS.lightGreen, justifyContent: 'center', alignItems: 'center', marginBottom: 16 }}>
-            <Text style={{ fontSize: 36, fontFamily: 'Inter_700Bold', color: COLORS.primary }}>R</Text>
+            <Text style={{ fontSize: 36, fontFamily: 'Inter_700Bold', color: COLORS.primary }}>
+              {student.name.charAt(0).toUpperCase()}
+            </Text>
           </View>
-          <Text style={{ fontSize: 24, fontFamily: 'Inter_700Bold', color: COLORS.textPrimary }}>Rahul Sharma</Text>
+          <Text style={{ fontSize: 24, fontFamily: 'Inter_700Bold', color: COLORS.textPrimary }}>{student.name}</Text>
           <Text style={{ fontSize: 16, fontFamily: 'Inter_400Regular', color: COLORS.textSecondary }}>CS Dept, Year 2</Text>
         </View>
 

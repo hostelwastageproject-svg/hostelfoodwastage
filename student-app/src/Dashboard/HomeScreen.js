@@ -1,9 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
 import { COLORS, globalStyles, SIZES, SHADOWS } from '../theme';
 import { Utensils, QrCode, FileText, Bell, MessageSquareWarning, CalendarClock, MessageCircle, Heart, Star } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';export default function HomeScreen({ navigation }) {
+  const [studentName, setStudentName] = useState('');
+  const [stats, setStats] = useState(null);
 
-export default function HomeScreen({ navigation }) {
+  useEffect(() => {
+    const loadProfile = async () => {
+      const details = await AsyncStorage.getItem('studentDetails');
+      const token = await AsyncStorage.getItem('studentToken');
+      if (details && token) {
+        const parsed = JSON.parse(details);
+        setStudentName(parsed.name.split(' ')[0]); // Get first name
+        
+        try {
+          const res = await axios.get(`http://10.72.224.188:5000/api/student-stats/dashboard?student_id=${parsed.id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (res.data) setStats(res.data);
+        } catch (error) {
+          console.error("Dashboard fetch error:", error);
+        }
+      }
+    };
+    loadProfile();
+  }, []);
+
   const cards = [
     { title: 'Daily Check-in', icon: Utensils, screen: 'Checkin' },
     { title: 'My Digital ID', icon: QrCode, screen: 'Barcode' },
@@ -23,7 +47,7 @@ export default function HomeScreen({ navigation }) {
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </Text>
           <Text style={{ fontSize: 24, fontFamily: 'Inter_700Bold', color: COLORS.textPrimary, marginTop: 4 }}>
-            Welcome, Rahul! 👋
+            Welcome, {studentName || 'Student'}! 👋
           </Text>
         </View>
 
@@ -38,10 +62,10 @@ export default function HomeScreen({ navigation }) {
           ...SHADOWS.soft
         }}>
            <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#2E7D32', marginBottom: 4 }}>
-             Yesterday 87% of students checked in.
+             Yesterday {stats ? stats.hostelStats?.checkinPercentage || 0 : '...'}% of students checked in.
            </Text>
            <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 13, color: '#388E3C' }}>
-             Kitchen wasted only 8 kg. Great job! 🎉
+             Kitchen wasted {stats ? stats.hostelStats?.savedFoodKg || 0 : '...'} kg less food. Great job! 🎉
            </Text>
         </View>
 
@@ -60,10 +84,10 @@ export default function HomeScreen({ navigation }) {
            <Text style={{ fontSize: 28, marginRight: 12 }}>🔥</Text>
            <View style={{ flex: 1 }}>
              <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 15, color: '#E65100', marginBottom: 2 }}>
-               5 Day Streak!
+               {stats ? stats.individualStats?.streak || 0 : '...'} Day Streak!
              </Text>
              <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 12, color: '#EF6C00' }}>
-               Your input helped save 2.5 kg of food 🌱
+               Your input helped save {stats ? stats.individualStats?.savedByMe || 0 : '...'} kg of food 🌱
              </Text>
            </View>
         </View>
