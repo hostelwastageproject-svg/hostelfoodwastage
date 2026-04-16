@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/register", registerStudent);
 router.post("/login", loginStudent);
-router.get("/", authMiddleware, getAllStudents);
+router.post("/", authMiddleware, getAllStudents);
 
 export default router;
 

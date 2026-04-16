@@ -32,6 +32,12 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/booking", bookingRoutes);
 app.use("/api/barcode", barcodeRoutes);
 
+const cors = require("cors");
+
+app.use(cors({
+  origin: "*"
+}));
+
 
 // Test Route
 app.get("/", (req, res) => {

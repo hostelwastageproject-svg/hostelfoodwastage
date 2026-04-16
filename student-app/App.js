@@ -23,6 +23,14 @@ import FeedbackScreen from './src/Feedback/FeedbackScreen';
 
 import { View, ActivityIndicator } from 'react-native';
 
+
+const cors = require("cors");
+
+app.use(cors({
+  origin: "*"
+}));
+
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -57,13 +65,13 @@ function TabNavigator() {
   );
 }
 
-import { setupPushNotifications } from './src/utils/notifications';
+//import { setupPushNotifications } from './src/utils/notifications';
 
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
-    setupPushNotifications();
+    //setupPushNotifications();
     async function loadFonts() {
       await Font.loadAsync({
         Inter_400Regular,
