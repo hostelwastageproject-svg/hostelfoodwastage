@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, Alert, ActivityIndicator } from 'react-native';
 import { COLORS, globalStyles, SIZES, SHADOWS } from '../theme';
 import { Camera, CheckCircle, Star } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { Platform } from 'react-native';
 
 export default function FeedbackScreen() {
   const [mealType, setMealType] = useState('lunch');
   const [rating, setRating] = useState(0);
   const [image, setImage] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -23,14 +27,64 @@ export default function FeedbackScreen() {
     }
   };
 
-  const handleFeedback = () => {
-    if (rating === 0) return; // Optional logic: block if no rating
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      setRating(0);
-      setImage(null);
-    }, 4000);
+  const handleFeedback = async () => {
+    if (rating === 0) {
+      Alert.alert('Error', 'Please provide a rating (1-5 stars)');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const details = await AsyncStorage.getItem('studentDetails');
+      const token = await AsyncStorage.getItem('studentToken');
+      
+      if (!details || !token) {
+         Alert.alert('Error', 'Please login first');
+         return;
+      }
+      
+      const parsed = JSON.parse(details);
+      
+      const formData = new FormData();
+      formData.append('student_id', parsed.id);
+      formData.append('meal_type', mealType);
+      formData.append('rating', rating);
+      
+      if (image) {
+         let localUri = image;
+         let filename = localUri.split('/').pop();
+         let match = /\.(\w+)$/.exec(filename);
+         let type = match ? `image/${match[1]}` : `image`;
+         
+         if (Platform.OS === 'web') {
+             // Fetch blob if web platform since local file paths don't work the same in FormData
+             const response = await fetch(localUri);
+             const blob = await response.blob();
+             formData.append('photo', blob, 'upload.jpg');
+         } else {
+             formData.append('photo', { uri: localUri, name: filename, type });
+         }
+      }
+
+      await axios.post('http://10.72.224.188:5000/api/feedback', formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}` 
+        }
+      });
+
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        setRating(0);
+        setImage(null);
+      }, 4000);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to submit feedback');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

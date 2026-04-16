@@ -1,18 +1,50 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
 import { COLORS, globalStyles, SIZES, SHADOWS } from '../theme';
 import { CheckCircle, XCircle } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 export default function CheckinScreen() {
   const [mealType, setMealType] = useState('lunch');
   const [status, setStatus] = useState(null); // 'confirmed' | 'opted_out'
   const [successMsg, setSuccessMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Daily Check-in Logic
-  const handleCheckin = (selectedStatus) => {
-    setStatus(selectedStatus);
-    setSuccessMsg(selectedStatus === 'confirmed' ? "You're checked in! 🍽️" : "You've opted out. Thanks for saving food! 🌱");
-    setTimeout(() => setSuccessMsg(''), 4000);
+  const handleCheckin = async (selectedStatus) => {
+    setLoading(true);
+    try {
+      const details = await AsyncStorage.getItem('studentDetails');
+      const token = await AsyncStorage.getItem('studentToken');
+      
+      if (!details || !token) {
+        Alert.alert('Error', 'Please login first');
+        return;
+      }
+      
+      const parsed = JSON.parse(details);
+      
+      const res = await axios.post('http://10.72.224.188:5000/api/checkin', {
+        student_id: parsed.id,
+        meal_type: mealType,
+        date: new Date().toISOString().split('T')[0], // Tomorrow's date? Wait, usually we send today's string and server offsets or we calculate tomorrow. Let's send tomorrow.
+        // ACTUALLY the server handles date logic or takes what we pass. The prompt says "Are you eating tomorrow?". Let's send Tomorrow's date:
+        date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+        status: selectedStatus
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setStatus(selectedStatus);
+      setSuccessMsg(selectedStatus === 'confirmed' ? "You're checked in! 🍽️" : "You've opted out. Thanks for saving food! 🌱");
+      setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to check in');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

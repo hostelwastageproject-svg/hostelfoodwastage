@@ -103,7 +103,13 @@ export const loginStudent = async (req, res) => {
 
         res.json({
             message: "Login successful",
-            token
+            token,
+            student: {
+                id: student.id,
+                name: student.name,
+                email: student.email,
+                reg_no: student.reg_no
+            }
         });
 
     } catch (error) {
