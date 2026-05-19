@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>KLU Hostel — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f1f5f9;
+  --white:#ffffff;
+  --card:#ffffff;
+  --border:#e2e8f0;
+  --border2:#cbd5e1;
+  --text:#0f172a;
+  --text2:#64748b;
+  --text3:#94a3b8;
+  --navy:#0f172a;
+  --blue:#2563eb;
+  --blue-h:#1d4ed8;
+  --blue-l:#eff6ff;
+  --blue-b:#bfdbfe;
+  --green:#16a34a;
+  --green-l:#f0fdf4;
+  --green-b:#bbf7d0;
+  --red:#dc2626;
+  --red-l:#fef2f2;
+  --red-b:#fecaca;
+  --amber:#d97706;
+  --amber-l:#fffbeb;
+  --amber-b:#fde68a;
+  --purple:#7c3aed;
+  --purple-l:#f5f3ff;
+  --purple-b:#ddd6fe;
+  --font:'Inter',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --radius:10px;
+  --radius-lg:14px;
+  --sidebar:248px;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
+
+/* ===== LAYOUT ===== */
+.layout{display:flex;min-height:100vh;}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:var(--sidebar);min-width:var(--sidebar);
+  background:var(--navy);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:200;
+  overflow-y:auto;
+}
+.sb-logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-chip{display:inline-block;background:var(--blue);color:#fff;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:.1em;padding:2px 8px;border-radius:4px;margin-bottom:10px;}
+.sb-name{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.02em;}
+.sb-tagline{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px;}
+.sb-nav{flex:1;padding:10px 10px;}
+.sb-group{font-size:10px;font-weight:600;color:rgba(255,255,255,.25);letter-spacing:.12em;text-transform:uppercase;padding:12px 8px 5px;}
+.sb-item{
+  display:flex;align-items:center;gap:9px;
+  width:100%;padding:9px 10px;
+  border:none;background:none;
+  color:rgba(255,255,255,.55);
+  font-family:var(--font);font-size:13px;font-weight:500;
+  border-radius:var(--radius);cursor:pointer;text-align:left;
+  transition:all .15s;
+}
+.sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9);}
+.sb-item.active{background:var(--blue);color:#fff;}
+.sb-item svg{flex-shrink:0;opacity:.75;}
+.sb-item.active svg{opacity:1;}
+.sb-foot{padding:12px 10px;border-top:1px solid rgba(255,255,255,.08);}
+.sb-user{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--radius);background:rgba(255,255,255,.06);}
+.sb-av{width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;letter-spacing:.05em;}
+.sb-uname{font-size:12px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.sb-urole{font-size:10px;color:rgba(255,255,255,.3);}
+.sb-logout{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.3);padding:4px;display:flex;border-radius:5px;transition:color .15s;}
+.sb-logout:hover{color:var(--red);}
+
+/* ===== MAIN ===== */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{
+  height:56px;background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:0 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.topbar-title{font-size:16px;font-weight:700;letter-spacing:-.02em;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.conn-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg);border:1px solid var(--border);font-size:11px;font-weight:500;color:var(--text3);}
+.dot{width:7px;height:7px;border-radius:50%;}
+.dot-ok{background:#22c55e;box-shadow:0 0 0 2px #dcfce7;}
+.dot-err{background:var(--red);box-shadow:0 0 0 2px #fee2e2;}
+.dot-chk{background:var(--amber);box-shadow:0 0 0 2px #fef9c3;}
+.page-wrap{padding:28px;flex:1;}
+.page{animation:rise .18s ease;}
+@keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ===== CARDS ===== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 24px;}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.card-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;}
+
+/* ===== STAT GRID ===== */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--sc,var(--blue));}
+.stat-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+.stat-value{font-size:30px;font-weight:700;color:var(--text);line-height:1;letter-spacing:-.03em;}
+.stat-note{font-size:11px;color:var(--text3);margin-top:5px;}
+
+/* ===== PAGE HEADER ===== */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:12px;flex-wrap:wrap;}
+.ph-title{font-size:22px;font-weight:700;letter-spacing:-.03em;}
+.ph-sub{font-size:13px;color:var(--text3);margin-top:3px;}
+
+/* ===== BADGES ===== */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;font-family:var(--mono);white-space:nowrap;}
+.bg{background:var(--green-l);color:var(--green);border:1px solid var(--green-b);}
+.br{background:var(--red-l);color:var(--red);border:1px solid var(--red-b);}
+.bb{background:var(--blue-l);color:var(--blue);border:1px solid var(--blue-b);}
+.ba{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b);}
+.bp{background:var(--purple-l);color:var(--purple);border:1px solid var(--purple-b);}
+.bgr{background:var(--bg);color:var(--text2);border:1px solid var(--border2);}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-blue{background:var(--blue);color:#fff;} .btn-blue:not(:disabled):hover{background:var(--blue-h);}
+.btn-outline{background:var(--white);color:var(--text2);border:1px solid var(--border2);} .btn-outline:not(:disabled):hover{background:var(--bg);}
+.btn-red{background:var(--red-l);color:var(--red);border:1px solid var(--red-b);} .btn-red:not(:disabled):hover{background:#fee2e2;}
+.btn-green{background:var(--green-l);color:var(--green);border:1px solid var(--green-b);}
+.btn-sm{padding:6px 13px;font-size:12px;}
+.btn-xs{padding:4px 9px;font-size:11px;}
+
+/* ===== FORMS ===== */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.fl{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
+.fi,.fsel,textarea{
+  width:100%;background:var(--bg);
+  border:1.5px solid var(--border2);border-radius:var(--radius);
+  color:var(--text);font-family:var(--font);font-size:13px;
+  padding:10px 13px;outline:none;transition:border-color .15s,background .15s;
+}
+.fi:focus,.fsel:focus,textarea:focus{border-color:var(--blue);background:var(--white);}
+.fi::placeholder,textarea::placeholder{color:var(--text3);}
+textarea{resize:vertical;min-height:80px;}
+.fhint{font-size:11px;color:var(--text3);}
+.ferr{font-size:11px;color:var(--red);font-family:var(--mono);}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+/* ===== TABLE ===== */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--border);white-space:nowrap;}
+td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg);}
+.mono{font-family:var(--mono);font-size:12px;color:var(--text2);}
+
+/* ===== TABS ===== */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:20px;gap:0;}
+.tab{padding:9px 18px;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--text2);font-family:var(--font);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+/* ===== ALERTS ===== */
+.alert{padding:11px 14px;border-radius:var(--radius);font-size:13px;line-height:1.6;margin-bottom:14px;}
+.alert-info{background:var(--blue-l);border:1px solid var(--blue-b);color:var(--blue);}
+.alert-warn{background:var(--amber-l);border:1px solid var(--amber-b);color:var(--amber);}
+.alert-ok{background:var(--green-l);border:1px solid var(--green-b);color:var(--green);}
+.alert-err{background:var(--red-l);border:1px solid var(--red-b);color:var(--red);}
+
+/* ===== MODAL ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal{background:var(--white);border-radius:var(--radius-lg);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:26px;box-shadow:0 24px 64px rgba(0,0,0,.18);}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-size:18px;font-weight:700;letter-spacing:-.02em;}
+.modal-close{background:none;border:none;cursor:pointer;color:var(--text3);font-size:22px;line-height:1;padding:2px 5px;border-radius:5px;transition:color .15s;}
+.modal-close:hover{color:var(--text);}
+
+/* ===== DROP ZONE ===== */
+.drop{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:32px;text-align:center;cursor:pointer;background:var(--bg);transition:all .15s;}
+.drop:hover,.drop.drag{border-color:var(--blue);background:var(--blue-l);}
+.drop input[type=file]{display:none;}
+
+/* ===== PROGRESS ===== */
+.prog{background:var(--bg);border-radius:99px;height:8px;overflow:hidden;}
+.prog-f{height:100%;border-radius:99px;transition:width .5s;}
+
+/* ===== TOAST ===== */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--navy);color:#fff;border-radius:var(--radius);padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,.18);animation:rise .2s ease;}
+
+/* ===== AVATAR ===== */
+.av{display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:11px;font-weight:700;flex-shrink:0;}
+
+/* ===== EMPTY ===== */
+.empty{text-align:center;padding:36px 20px;color:var(--text3);}
+.empty-ico{font-size:32px;margin-bottom:8px;}
+.empty-txt{font-size:14px;font-weight:500;}
+
+/* ===== DIVIDER ===== */
+hr{border:none;border-top:1px solid var(--border);margin:18px 0;}
+
+/* ===== LOGIN ===== */
+.login-wrap{min-height:100vh;display:flex;}
+.login-left{flex:1;background:var(--navy);display:flex;align-items:center;justify-content:center;padding:48px;}
+.login-art{max-width:380px;}
+.login-art-h{font-size:40px;font-weight:800;color:#fff;letter-spacing:-.04em;line-height:1.1;margin-bottom:14px;}
+.login-art-h span{color:#60a5fa;}
+.login-art-p{font-size:14px;color:rgba(255,255,255,.4);line-height:1.8;}
+.login-features{margin-top:28px;display:flex;flex-direction:column;gap:10px;}
+.lf{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.5);}
+.lf::before{content:'';width:5px;height:5px;border-radius:50%;background:#60a5fa;flex-shrink:0;}
+.login-right{width:420px;background:var(--white);display:flex;align-items:center;justify-content:center;padding:40px;}
+.login-box{width:100%;max-width:340px;}
+.login-box h2{font-size:24px;font-weight:700;letter-spacing:-.03em;margin-bottom:4px;}
+.login-box p{font-size:13px;color:var(--text3);margin-bottom:26px;}
+
+@media(max-width:900px){
+  .login-left{display:none;}
+  .login-right{width:100%;}
+  .sidebar{transform:translateX(-100%);}
+  .main{margin-left:0;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .f2{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─────────────────────────────────────────────────────────────
+//  BACKEND URL — change this one line to your server address
+// ─────────────────────────────────────────────────────────────
+const BACKEND = localStorage.getItem('klu_admin_backend') || 'http://localhost:5000';
+const API     = BACKEND + '/api';
+// Debug: log to console so user can verify
+console.log('[KLU Admin] Backend URL:', API);
+// ─────────────────────────────────────────────────────────────
+
+// ── EXACT ROUTES (read from your backend) ───────────────────
+//  POST   /api/admin/login                 body:{email,password}        → {token}
+//  POST   /api/admin/register              body:{name,email,password}   → {id,name,email,created_at}
+//  GET    /api/admin/all                   header:adminAuth             → [{id,name,email,created_at}]
+//  DELETE /api/admin/:id                   header:adminAuth             → {message}
+//  GET    /api/admin/dashboard             header:adminAuth             → {total_students,total_staff,today_bookings,today_attendance,today_absent}
+//  GET    /api/admin/attendance            header:adminAuth ?date=&meal_type= → {count,data:[...]}
+//  GET    /api/admin/attendance/absent     header:adminAuth ?date=&meal_type= → {count,data:[...]}
+//  GET    /api/admin/attendance/summary    header:adminAuth ?date=&meal_type= → {total_booked,total_present,total_absent}
+//  POST   /api/admin/allowed-email/add     header:adminAuth body:{email}         → {message,email:{...}}
+//  POST   /api/admin/allowed-email/upload  header:adminAuth multipart field:"file" → {inserted,duplicates}
+//  POST   /api/staff/register              body:{name,email,password,role}  → {id,name,email,role}
+//  GET    /api/staff/                      no auth                          → [{id,name,email,role,created_at}]
+//  POST   /api/students/                   no auth, no body                 → [{id,name,email,reg_no,created_at}]
+//  GET    /api/booking/                    no auth                          → [{id,reg_no,food_pref,meal_type,date,status,token_number,name}]
+//  GET    /api/dashboard/stats             no auth                          → {total_students,total_bookings,todays_bookings,meal_breakdown,active,cancelled}
+//  GET    /api/dashboard/recent            no auth                          → [{id,meal_type,date,status,created_at,student_name,reg_no}]
+
+// ── API HELPER ───────────────────────────────────────────────
+async function apiFetch(method, path, body, token, formData) {
+  const headers = {};
+  if (token)             headers['Authorization'] = 'Bearer ' + token;
+  if (body && !formData) headers['Content-Type']  = 'application/json';
+
+  const options = { method, headers };
+  if (formData) options.body = formData;
+  else if (body) options.body = JSON.stringify(body);
+
+  try {
+    const res  = await fetch(API + path, options);
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = { message: text || 'Empty response' }; }
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    const isCors = err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'));
+    const msg = isCors
+      ? 'Cannot connect to backend at ' + BACKEND + '. Check: server running? CORS enabled? Correct port?'
+      : (err.message || 'Unknown network error');
+    return { ok: false, status: 0, data: { message: msg } };
+  }
+}
+
+// ── TOAST HOOK ───────────────────────────────────────────────
+function useToast() {
+  const [toasts, setToasts] = useState([]);
+  const add = useCallback((icon, msg) => {
+    const id = Date.now() + Math.random();
+    setToasts(t => [...t, { id, icon, msg }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500);
+  }, []);
+  return [toasts, add];
+}
+
+function ToastContainer({ toasts }) {
+  return (
+    <div className="toast-wrap">
+      {toasts.map(t => (
+        <div key={t.id} className="toast">
+          <span style={{fontSize:16}}>{t.icon}</span>
+          <span>{t.msg}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── HELPERS ──────────────────────────────────────────────────
+const initials = n => (n||'?').trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+const todayISO = () => new Date().toISOString().split('T')[0];
+const csvDown  = (rows, name) => {
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));
+  a.download = name; a.click();
+};
+
+// ── CONNECTION DOT ────────────────────────────────────────────
+function ConnDot({ onConfigure }) {
+  const [s, setS] = useState('chk');
+
+  function ping() {
+    setS('chk');
+    fetch(BACKEND + '/', { signal: AbortSignal.timeout(4000) })
+      .then(r => { setS(r.ok || r.status < 500 ? 'ok' : 'err'); })
+      .catch(() => setS('err'));
+  }
+
+  useEffect(() => { ping(); }, []);
+
+  const label = { ok: 'Connected', err: 'Offline', chk: 'Checking…' };
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:8}}>
+      <div className="conn-pill" onClick={ping} style={{cursor:'pointer'}} title="Click to re-check">
+        <div className={`dot dot-${s}`} />
+        {label[s]}
+      </div>
+      <button className="btn btn-outline btn-sm" onClick={onConfigure}
+        style={{fontSize:11,padding:'4px 10px'}}>⚙ API</button>
+    </div>
+  );
+}
+
+// ── API CONFIG MODAL ─────────────────────────────────────────
+function ApiConfig({ onClose }) {
+  const [url, setUrl] = useState(BACKEND);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState(null); // null | 'ok' | 'fail'
+
+  async function testConn() {
+    setTesting(true); setTestResult(null);
+    try {
+      const r = await fetch(url.replace(/\/$/, '') + '/', { signal: AbortSignal.timeout(5000) });
+      setTestResult(r.ok || r.status < 500 ? 'ok' : 'fail');
+    } catch {
+      setTestResult('fail');
+    }
+    setTesting(false);
+  }
+
+  function save() {
+    const clean = url.replace(/\/$/, '');
+    // Patch the global — requires reload to take full effect but helps immediately
+    localStorage.setItem('klu_admin_backend', clean);
+    alert('Saved! The page will reload to apply the new backend URL: ' + clean);
+    window.location.reload();
+  }
+
+  return (
+    <div className="overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-hd">
+          <div className="modal-title">⚙ Backend API settings</div>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="alert alert-info" style={{marginBottom:14}}>
+          Change this if your backend is running on a different IP address or port.
+        </div>
+        <div className="fg">
+          <label className="fl">Backend URL</label>
+          <input className="fi" value={url} onChange={e => setUrl(e.target.value)}
+            placeholder="http://192.168.1.10:5000"
+            style={{fontFamily:'var(--mono)',fontSize:13}} />
+          <span className="fhint">Current: <strong>{API}</strong></span>
+        </div>
+        {testResult === 'ok'   && <div className="alert alert-ok"  style={{marginBottom:12}}>✅ Server reachable!</div>}
+        {testResult === 'fail' && <div className="alert alert-err" style={{marginBottom:12}}>❌ Cannot reach that URL. Check IP, port and that backend is running.</div>}
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          <button className="btn btn-outline" onClick={testConn} disabled={testing}>
+            {testing ? 'Testing…' : '🔌 Test connection'}
+          </button>
+          <button className="btn btn-blue" style={{marginLeft:'auto'}} onClick={save}>
+            Save &amp; reload
+          </button>
+        </div>
+        <hr/>
+        <div style={{fontSize:11,color:'var(--text3)',fontFamily:'var(--mono)',lineHeight:1.8}}>
+          <div>Current API: {API}</div>
+          <div>Tip: Your backend must have <strong>cors()</strong> enabled — it does (app.use(cors()))</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════════════════════
+function Login({ onLogin }) {
+  const [email, setEmail] = useState('');
+  const [pass,  setPass]  = useState('');
+  const [err,   setErr]   = useState('');
+  const [busy,  setBusy]  = useState(false);
+
+  async function submit() {
+    if (!email.trim() || !pass) { setErr('Please fill in both fields.'); return; }
+    setBusy(true); setErr('');
+
+    // POST /api/admin/login  body:{email,password}
+    // success → {token}    failure → {message}
+    const res = await apiFetch('POST', '/admin/login', { email: email.trim(), password: pass });
+
+    if (res.ok && res.data.token) {
+      // Decode JWT payload to get name/email for the sidebar
+      let payload = {};
+      try { payload = JSON.parse(atob(res.data.token.split('.')[1])); } catch {}
+      onLogin(res.data.token, payload);
+    } else {
+      setErr(res.data.message || 'Login failed. Check your credentials.');
+    }
+    setBusy(false);
+  }
+
+  return (
+    <div className="login-wrap">
+      <div className="login-left">
+        <div className="login-art">
+          <div className="login-art-h">KLU Hostel<br/><span>Admin</span><br/>Control Centre</div>
+          <div className="login-art-p">Full control over students, staff, meal bookings and attendance reports.</div>
+          <div className="login-features">
+            <div className="lf">Login only with stored admin emails</div>
+            <div className="lf">Register &amp; manage staff accounts</div>
+            <div className="lf">Whitelist student emails (single or bulk XLSX)</div>
+            <div className="lf">Attendance reports — present, absent, summary</div>
+            <div className="lf">Dashboard: today's bookings &amp; meal stats</div>
+          </div>
+        </div>
+      </div>
+      <div className="login-right">
+        <div className="login-box">
+          <h2>Welcome back</h2>
+          <p>Sign in with your registered admin email</p>
+          {err && <div className="alert alert-err">{err}</div>}
+          <div className="fg">
+            <label className="fl">Admin email</label>
+            <input className="fi" type="email" placeholder="admin@klu.ac.in"
+              value={email} onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()} />
+          </div>
+          <div className="fg" style={{marginBottom:20}}>
+            <label className="fl">Password</label>
+            <input className="fi" type="password" placeholder="••••••••"
+              value={pass} onChange={e => setPass(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()} />
+          </div>
+          <button className="btn btn-blue" style={{width:'100%',padding:'11px'}}
+            onClick={submit} disabled={busy}>
+            {busy ? 'Signing in…' : 'Sign in →'}
+          </button>
+          <div style={{marginTop:16,fontSize:11,color:'var(--text3)',textAlign:'center',fontFamily:'var(--mono)',lineHeight:1.8}}>
+            <div>Backend: {BACKEND}</div>
+            <button style={{marginTop:6,fontSize:11,color:'var(--blue)',background:'none',border:'none',cursor:'pointer',textDecoration:'underline'}}
+              onClick={() => {
+                const u = prompt('Enter backend URL (e.g. http://192.168.1.10:5000):', BACKEND);
+                if (u) { localStorage.setItem('klu_admin_backend', u.trim().replace(/\/$/, '')); window.location.reload(); }
+              }}>
+              Change backend URL
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function Dashboard({ token }) {
+  const [dash,   setDash]   = useState(null);
+  const [stats,  setStats]  = useState(null);
+  const [recent, setRecent] = useState([]);
+  const [loading,setLoading]= useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      apiFetch('GET', '/admin/dashboard', null, token),  // adminAuth
+      apiFetch('GET', '/dashboard/stats', null, token),  // no auth
+      apiFetch('GET', '/dashboard/recent', null, token),  // no auth
+    ]).then(([d, s, r]) => {
+      if (d.ok) setDash(d.data);
+      if (s.ok) setStats(s.data);
+      if (Array.isArray(r.data)) setRecent(r.data);
+      setLoading(false);
+    });
+  }, [token]);
+
+  if (loading) return <div style={{padding:40,color:'var(--text3)'}}>Loading dashboard…</div>;
+
+  const meals = ['breakfast','lunch','dinner'];
+  const mealEmoji = { breakfast:'☀️', lunch:'🌤', dinner:'🌙' };
+
+  return (
+    <div className="page">
+      <div className="ph">
+        <div>
+          <div className="ph-title">Dashboard</div>
+          <div className="ph-sub">Today's overview · {new Date().toDateString()}</div>
+        </div>
+      </div>
+
+      {/* Stat cards */}
+      <div className="stat-grid">
+        {[
+          { label:'Total students',   value: dash?.total_students  ?? stats?.total_students ?? '—', sc:'var(--blue)'   },
+          { label:'Total staff',      value: dash?.total_staff     ?? '—',                          sc:'var(--green)'  },
+          { label:'Today bookings',   value: stats?.todays_bookings ?? '—',                          sc:'var(--amber)'  },
+          { label:'Active bookings',  value: stats?.active         ?? '—',                          sc:'var(--purple)' },
+        ].map((s, i) => (
+          <div key={i} className="stat" style={{'--sc': s.sc}}>
+            <div className="stat-label">{s.label}</div>
+            <div className="stat-value">{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Meal attendance bars — from /api/admin/dashboard */}
+      {dash && (
+        <div className="card" style={{marginBottom:18}}>
+          <div className="card-title" style={{marginBottom:16}}>Today's meal attendance</div>
+          {meals.map(m => {
+            const booked  = dash.today_bookings?.[m]  || 0;
+            const present = dash.today_attendance?.[m] || 0;
+            const absent  = dash.today_absent?.[m]    || 0;
+            const pct     = booked > 0 ? Math.round((present / booked) * 100) : 0;
+            return (
+              <div key={m} style={{marginBottom:16}}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+                  <span style={{fontWeight:600,textTransform:'capitalize'}}>{mealEmoji[m]} {m}</span>
+                  <div style={{display:'flex',gap:6}}>
+                    <span className="badge bg">{present} present</span>
+                    <span className="badge br">{absent} absent</span>
+                    <span className="badge bgr">{booked} booked</span>
+                  </div>
+                </div>
+                <div className="prog">
+                  <div className="prog-f" style={{
+                    width: pct + '%',
+                    background: pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)'
+                  }}/>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Meal breakdown from /api/dashboard/stats */}
+      {stats?.meal_breakdown && (
+        <div className="card" style={{marginBottom:18}}>
+          <div className="card-title" style={{marginBottom:14}}>All-time booking breakdown</div>
+          {stats.meal_breakdown.map(m => (
+            <div key={m.meal_type} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+              <span style={{fontWeight:500,textTransform:'capitalize'}}>{mealEmoji[m.meal_type]||'🍽'} {m.meal_type}</span>
+              <span className="mono">{m.count}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Recent bookings from /api/dashboard/recent */}
+      <div className="card">
+        <div className="card-hd">
+          <div className="card-title">Recent bookings (last 10)</div>
+        </div>
+        <div className="tbl-wrap">
+          <table>
+            <thead>
+              <tr><th>Student</th><th>Reg no</th><th>Meal</th><th>Date</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {recent.length === 0 && (
+                <tr><td colSpan="5"><div className="empty"><div className="empty-ico">📋</div><div className="empty-txt">No bookings yet</div></div></td></tr>
+              )}
+              {recent.map(b => (
+                <tr key={b.id}>
+                  <td style={{fontWeight:600}}>{b.student_name}</td>
+                  <td className="mono">{b.reg_no}</td>
+                  <td><span className="badge bb" style={{textTransform:'capitalize'}}>{b.meal_type}</span></td>
+                  <td className="mono">{b.date}</td>
+                  <td><span className={`badge ${b.status === 'active' ? 'bg' : 'br'}`}>{b.status}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STUDENTS
+// ═══════════════════════════════════════════════════════════════
+function Students({ token }) {
+  const [rows,    setRows]    = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [q,       setQ]       = useState('');
+
+  const [fetchErr, setFetchErr] = useState('');
+
+  useEffect(() => {
+    // Backend route: router.post("/", getAllStudents)  → POST /api/students/
+    // Pass admin token in Authorization header so backend doesn't reject
+    apiFetch('POST', '/students/', {}, token).then(res => {
+      if (Array.isArray(res.data)) {
+        setRows(res.data);
+        setFetchErr('');
+      } else if (res.data && typeof res.data === 'object' && !res.data.message) {
+        // Wrapped response: { students: [...] } or similar
+        const arr = Object.values(res.data).find(v => Array.isArray(v));
+        if (arr) { setRows(arr); setFetchErr(''); }
+        else setFetchErr('Unexpected response format from /api/students/');
+      } else {
+        setFetchErr(res.data?.message || 'Failed to load students. HTTP ' + res.status);
+      }
+      setLoading(false);
+    });
+  }, [token]);
+
+  const filtered = rows.filter(s =>
+    (s.name||'').toLowerCase().includes(q.toLowerCase()) ||
+    (s.reg_no||'').includes(q) ||
+    (s.email||'').toLowerCase().includes(q.toLowerCase())
+  );
+
+  return (
+    <div className="page">
+      <div className="ph">
+        <div>
+          <div className="ph-title">Students</div>
+          <div className="ph-sub">{rows.length} registered</div>
+        </div>
+        <button className="btn btn-outline btn-sm" onClick={() =>
+          csvDown([['Name','Email','Reg No','Joined'],...filtered.map(s=>[s.name,s.email,s.reg_no,fmtDate(s.created_at)])], 'students.csv')
+        }>⬇ Export CSV</button>
+      </div>
+      <div className="card">
+        <input className="fi" placeholder="Search name, email or reg no…"
+          value={q} onChange={e => setQ(e.target.value)}
+          style={{maxWidth:380, marginBottom:16}} />
+        <div className="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Reg no</th><th>Joined</th></tr></thead>
+            <tbody>
+              {loading && <tr><td colSpan="5" style={{textAlign:'center',padding:28,color:'var(--text3)'}}>Loading…</td></tr>}
+              {!loading && fetchErr && (
+                <tr><td colSpan="5"><div style={{padding:'20px',color:'var(--red)',background:'var(--red-l)',borderRadius:8,margin:8,fontSize:13}}>⚠ {fetchErr}</div></td></tr>
+              )}
+              {!loading && !fetchErr && filtered.length === 0 && (
+                <tr><td colSpan="5"><div className="empty"><div className="empty-ico">🎓</div><div className="empty-txt">No students found</div></div></td></tr>
+              )}
+              {filtered.map((s, i) => (
+                <tr key={s.id}>
+                  <td className="mono" style={{color:'var(--text3)'}}>{i + 1}</td>
+                  <td>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      <div className="av" style={{width:30,height:30,background:'var(--blue-l)',color:'var(--blue)'}}>{initials(s.name)}</div>
+                      <span style={{fontWeight:600}}>{s.name}</span>
+                    </div>
+                  </td>
+                  <td className="mono">{s.email}</td>
+                  <td><span className="badge bb">{s.reg_no}</span></td>
+                  <td className="mono">{fmtDate(s.created_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STAFF  (list + REGISTER NEW STAFF)
+// ═══════════════════════════════════════════════════════════════
+function Staff({ token, toast }) {
+  const [rows,    setRows]    = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [q,       setQ]       = useState('');
+  const [open,    setOpen]    = useState(false);
+
+  // Form state
+  const [name,    setName]    = useState('');
+  const [email,   setEmail]   = useState('');
+  const [pass,    setPass]    = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [role,    setRole]    = useState('staff');
+  const [errs,    setErrs]    = useState({});
+  const [saving,  setSaving]  = useState(false);
+
+  const [fetchErr, setFetchErr] = useState('');
+
+  function loadStaff() {
+    setLoading(true);
+    setFetchErr('');
+    // GET /api/staff/  — returns plain array [{id,name,email,role,created_at}]
+    apiFetch('GET', '/staff/', null, token).then(res => {
+      if (Array.isArray(res.data)) {
+        setRows(res.data);
+        setFetchErr('');
+      } else if (res.data && typeof res.data === 'object' && !res.data.message) {
+        const arr = Object.values(res.data).find(v => Array.isArray(v));
+        if (arr) { setRows(arr); setFetchErr(''); }
+        else setFetchErr('Unexpected response from /api/staff/');
+      } else {
+        setFetchErr(res.data?.message || 'Failed to load staff. HTTP ' + res.status);
+      }
+      setLoading(false);
+    });
+  }
+
+  useEffect(() => { loadStaff(); }, []);
+
+  function closeModal() {
+    setOpen(false);
+    setName(''); setEmail(''); setPass(''); setConfirm(''); setRole('staff'); setErrs({});
+  }
+
+  function validate() {
+    const e = {};
+    if (!name.trim())            e.name    = 'Name is required';
+    if (!email.trim())           e.email   = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(email)) e.email = 'Enter a valid email';
+    if (!pass)                   e.pass    = 'Password is required';
+    else if (pass.length < 6)    e.pass    = 'Minimum 6 characters';
+    if (pass !== confirm)        e.confirm = 'Passwords do not match';
+    setErrs(e);
+    return Object.keys(e).length === 0;
+  }
+
+  async function registerStaff() {
+    if (!validate()) return;
+    setSaving(true);
+
+    // POST /api/staff/register
+    // body: { name, email, password, role }
+    // success → { id, name, email, role }
+    // failure → { message: "Staff already exists" }
+    const res = await apiFetch('POST', '/staff/register', {
+      name:     name.trim(),
+      email:    email.trim(),
+      password: pass,
+      role:     role,
+    });
+
+    if (res.ok && res.data.id) {
+      toast('✅', `Staff "${res.data.name}" registered successfully!`);
+      closeModal();
+      loadStaff();
+    } else {
+      toast('❌', res.data.message || 'Registration failed. Try again.');
+    }
+    setSaving(false);
+  }
+
+  const filtered = rows.filter(s =>
+    (s.name||'').toLowerCase().includes(q.toLowerCase()) ||
+    (s.email||'').toLowerCase().includes(q.toLowerCase()) ||
+    (s.role||'').toLowerCase().includes(q.toLowerCase())
+  );
+
+  const roleColor = { staff:'bb', warden:'bp', manager:'ba', cook:'bg' };
+
+  return (
+    <div className="page">
+      <div className="ph">
+        <div>
+          <div className="ph-title">Staff management</div>
+          <div className="ph-sub">{rows.length} staff registered</div>
+        </div>
+        <button className="btn btn-blue" onClick={() => setOpen(true)}>+ Register new staff</button>
+      </div>
+
+      <div className="card">
+        <input className="fi" placeholder="Search name, email or role…"
+          value={q} onChange={e => setQ(e.target.value)}
+          style={{maxWidth:380, marginBottom:16}} />
+        <div className="tbl-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Staff member</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+            <tbody>
+              {loading && <tr><td colSpan="5" style={{textAlign:'center',padding:28,color:'var(--text3)'}}>Loading…</td></tr>}
+              {!loading && fetchErr && (
+                <tr><td colSpan="5"><div style={{padding:'20px',color:'var(--red)',background:'var(--red-l)',borderRadius:8,margin:8,fontSize:13}}>⚠ {fetchErr}</div></td></tr>
+              )}
+              {!loading && !fetchErr && filtered.length === 0 && (
+                <tr><td colSpan="5"><div className="empty"><div className="empty-ico">👥</div><div className="empty-txt">No staff registered yet</div></div></td></tr>
+              )}
+              {filtered.map((s, i) => (
+                <tr key={s.id}>
+                  <td className="mono" style={{color:'var(--text3)'}}>{i + 1}</td>
+                  <td>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      <div className="av" style={{width:32,height:32,background:'var(--blue-l)',color:'var(--blue)'}}>{initials(s.name)}</div>
+                      <span style={{fontWeight:600}}>{s.name}</span>
+                    </div>
+                  </td>
+                  <td className="mono">{s.email}</td>
+                  <td>
+                    <span className={`badge ${roleColor[s.role] || 'bgr'}`} style={{textTransform:'capitalize'}}>
+                      {s.role || 'staff'}
+                    </span>
+                  </td>
+                  <td className="mono">{fmtDate(s.created_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── REGISTER STAFF MODAL ── */}
+      {open && (
+        <div className="overlay" onClick={e => e.target === e.currentTarget && closeModal()}>
+          <div className="modal">
+            <div className="modal-hd">
+              <div className="modal-title">Register new staff</div>
+              <button className="modal-close" onClick={closeModal}>×</button>
+            </div>
+
+            <div className="alert alert-info" style={{marginBottom:18}}>
+              This creates a Staff Portal login. The staff member will use this email and password to sign in.
+            </div>
+
+            {/* Name + Role */}
+            <div className="f2">
+              <div className="fg">
+                <label className="fl">Full name *</label>
+                <input className="fi" placeholder="e.g. Ravi Kumar"
+                  value={name} onChange={e => setName(e.target.value)} />
+                {errs.name && <span className="ferr">{errs.name}</span>}
+              </div>
+              <div className="fg">
+                <label className="fl">Role *</label>
+                <select className="fsel" value={role} onChange={e => setRole(e.target.value)}>
+                  <option value="staff">Staff</option>
+                  <option value="warden">Warden</option>
+                  <option value="manager">Manager</option>
+                  <option value="cook">Cook</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Email */}
+            <div className="fg">
+              <label className="fl">Email address *</label>
+              <input className="fi" type="email" placeholder="staff@example.com"
+                value={email} onChange={e => setEmail(e.target.value)} />
+              {errs.email && <span className="ferr">{errs.email}</span>}
+              <span className="fhint">Staff uses this to log in to the Staff Portal</span>
+            </div>
+
+            {/* Password + Confirm */}
+            <div className="f2">
+              <div className="fg">
+                <label className="fl">Password *</label>
+                <input className="fi" type="password" placeholder="Min. 6 characters"
+                  value={pass} onChange={e => setPass(e.target.value)} />
+                {errs.pass && <span className="ferr">{errs.pass}</span>}
+              </div>
+              <div className="fg">
+                <label className="fl">Confirm password *</label>
+                <input className="fi" type="password" placeholder="Repeat password"
+                  value={confirm} onChange={e => setConfirm(e.target.value)} />
+                {errs.confirm && <span className="ferr">{errs.confirm}</span>}
+              </div>
+            </div>
+
+            <hr />
+            <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
+              <button className="btn btn-outline" onClick={closeModal}>Cancel</button>
+              <button className="btn btn-blue" onClick={registerStaff} disabled={saving}>
+                {saving ? 'Registering…' : '✓ Register staff'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ALLOWED EMAILS
+// ═══════════════════════════════════════════════════════════════
+function AllowedEmails({ token, toast }) {
+  const [tab,     setTab]     = useState('single');
+  const [email,   setEmail]   = useState('');
+  const [file,    setFile]    = useState(null);
+  const [drag,    setDrag]    = useState(false);
+  const [busy,    setBusy]    = useState(false);
+  const [result,  setResult]  = useState(null);
+  const fileRef = useRef();
+
+  async function addSingle() {
+    if (!email.trim()) { toast('⚠️', 'Enter an email address'); return; }
+    setBusy(true);
+    // POST /api/admin/allowed-email/add  adminAuth  body:{email}
+    // success → { message:"Email added to allowed list", email:{id,email} }
+    // failure → { message:"Email already allowed" }
+    const res = await apiFetch('POST', '/admin/allowed-email/add', { email: email.trim() }, token);
+    if (res.ok && (res.data.email || res.data.message?.includes('added'))) {
+      toast('✅', 'Email whitelisted!');
+      setEmail('');
+    } else {
+      toast('❌', res.data.message || 'Failed to add email');
+    }
+    setBusy(false);
+  }
+
+  async function uploadBulk() {
+    if (!file) { toast('⚠️', 'Please select a file first'); return; }
+    setBusy(true); setResult(null);
+    const fd = new FormData();
+    fd.append('file', file);  // backend expects field name = "file"
+    // POST /api/admin/allowed-email/upload  adminAuth  multipart
+    // success → { message, inserted, duplicates }
+    const res = await apiFetch('POST', '/admin/allowed-email/upload', null, token, fd);
+    if (res.ok && typeof res.data.inserted === 'number') {
+      setResult(res.data);
+      toast('✅', `${res.data.inserted} emails added`);
+      setFile(null);
+    } else {
+      toast('❌', res.data.message || 'Upload failed');
+    }
+    setBusy(false);
+  }
+
+  return (
+    <div className="page">
+      <div className="ph">
+        <div>
+          <div className="ph-title">Allowed emails</div>
+          <div className="ph-sub">Control which students can register</div>
+        </div>
+      </div>
+
+      <div className="alert alert-info" style={{marginBottom:20}}>
+        Only <strong>@klu.ac.in</strong> emails that are whitelisted here can create a student account.
+        The registration number is auto-extracted from the email prefix.
+      </div>
+
+      <div className="tabs">
+        {[['single','Add single email'],['bulk','Bulk upload (.xlsx)']].map(([id,label]) => (
+          <button key={id} className={`tab${tab === id ? ' active' : ''}`}
+            onClick={() => { setTab(id); setResult(null); }}>{label}</button>
+        ))}
+      </div>
+
+      {tab === 'single' && (
+        <div className="card" style={{maxWidth:460}}>
+          <div className="card-title" style={{marginBottom:14}}>Whitelist a student email</div>
+          <div className="fg">
+            <label className="fl">Student KLU email</label>
+            <input className="fi" type="email" placeholder="2200030000@klu.ac.in"
+              value={email} onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addSingle()} />
+            <span className="fhint">Reg no is auto-extracted from the email prefix (must be 10–11 digits)</span>
+          </div>
+          <button className="btn btn-blue" onClick={addSingle} disabled={busy}>
+            {busy ? 'Adding…' : '+ Add to whitelist'}
+          </button>
+        </div>
+      )}
+
+      {tab === 'bulk' && (
+        <div style={{maxWidth:520}}>
+          <div className="card" style={{marginBottom:16}}>
+            <div className="card-title" style={{marginBottom:14}}>Upload Excel file</div>
+            <div className="alert alert-warn" style={{marginBottom:14}}>
+              The Excel file must have a column named <strong>email</strong> (or Email / EMAIL). One email per row.
+            </div>
+            <div
+              className={`drop${drag ? ' drag' : ''}`}
+              onClick={() => fileRef.current?.click()}
+              onDragOver={e => { e.preventDefault(); setDrag(true); }}
+              onDragLeave={() => setDrag(false)}
+              onDrop={e => { e.preventDefault(); setDrag(false); setFile(e.dataTransfer.files[0]); }}
+            >
+              <input ref={fileRef} type="file" accept=".xlsx,.xls"
+                onChange={e => setFile(e.target.files[0])} />
+              <div style={{fontSize:28,marginBottom:10}}>📊</div>
+              {file ? (
+                <>
+                  <div style={{fontWeight:600,color:'var(--green)'}}>{file.name}</div>
+                  <div style={{fontSize:12,color:'var(--text3)',marginTop:4}}>{(file.size/1024).toFixed(1)} KB · click to change</div>
+                </>
+              ) : (
+                <>
+                  <div style={{fontWeight:600}}>Drop .xlsx file here</div>
+                  <div style={{fontSize:12,color:'var(--text3)',marginTop:4}}>or click to browse</div>
+                </>
+              )}
+            </div>
+            {file && (
+              <button className="btn btn-blue" style={{marginTop:12}} onClick={uploadBulk} disabled={busy}>
+                {busy ? 'Uploading…' : '⬆ Upload & process'}
+              </button>
+            )}
+          </div>
+
+          {result && (
+            <div className="card">
+              <div className="card-title" style={{marginBottom:14}}>Upload result</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                <div style={{background:'var(--green-l)',border:'1px solid var(--green-b)',borderRadius:10,padding:16,textAlign:'center'}}>
+                  <div style={{fontSize:28,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{result.inserted}</div>
+                  <div style={{fontSize:12,color:'var(--green)',marginTop:4,fontWeight:600}}>Emails added</div>
+                </div>
+                <div style={{background:'var(--amber-l)',border:'1px solid var(--amber-b)',borderRadius:10,padding:16,textAlign:'center'}}>
+                  <div style={{fontSize:28,fontWeight:700,color:'var(--amber)',fontFamily:'var(--mono)'}}>{result.duplicates}</div>
+                  <div style={{fontSize:12,color:'var(--amber)',marginTop:4,fontWeight:600}}>Skipped (duplicate)</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ATTENDANCE
+// ═══════════════════════════════════════════════════════════════
+function Attendance({ token }) {
+  const [date,    setDate]    = useState(todayISO());
+  const [meal,    setMeal]    = useState('lunch');
+  const [tab,     setTab]     = useState('summary');
+  const [summary, setSummary] = useState(null);
+  const [present, setPresent] = useState([]);
+  const [absent,  setAbsent]  = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  async function load() {
+    setLoading(true);
+    const q = `?date=${date}&meal_type=${meal}`;
+    const [s, p, a] = await Promise.all([
+      apiFetch('GET', '/admin/attendance/summary' + q, null, token), // {total_booked,total_present,total_absent}
+      apiFetch('GET', '/admin/attendance'          + q, null, token), // {count,data:[{booking_id,reg_no,student_name,food_pref,scanned_at}]}
+      apiFetch('GET', '/admin/attendance/absent'   + q, null, token), // {count,data:[{booking_id,reg_no,student_name,food_pref,token_number}]}
+    ]);
+    if (s.ok) setSummary(s.data);
+    if (p.ok) setPresent(p.data?.data || []);
+    if (a.ok) setAbsent(a.data?.data  || []);
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, [date, meal, token]);
+
+  const pct = summary && summary.total_booked > 0
+    ? Math.round((summary.total_present / summary.total_booked) * 100) : 0;
+
+  return (
+    <div className="page">
+      <div className="ph"><div><div className="ph-title">Attendance</div><div className="ph-sub">Meal scan records</div></div></div>
+
+      {/* Filters */}
+      <div className="card" style={{marginBottom:18}}>
+        <div style={{display:'flex',gap:14,flexWrap:'wrap',alignItems:'flex-end'}}>
+          <div className="fg" style={{marginBottom:0}}>
+            <label className="fl">Date</label>
+            <input className="fi" type="date" value={date} onChange={e => setDate(e.target.value)} style={{width:170}} />
+          </div>
+          <div className="fg" style={{marginBottom:0}}>
+            <label className="fl">Meal</label>
+            <select className="fsel" value={meal} onChange={e => setMeal(e.target.value)} style={{width:150}}>
+              <option value="breakfast">☀️ Breakfast</option>
+              <option value="lunch">🌤 Lunch</option>
+              <option value="dinner">🌙 Dinner</option>
+            </select>
+          </div>
+          <button className="btn btn-outline btn-sm" onClick={load}>↻ Refresh</button>
+        </div>
+      </div>
+
+      {/* Summary stat cards */}
+      {summary && (
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:18}}>
+          {[
+            { label:'Total booked', value:summary.total_booked,  sc:'var(--blue)'  },
+            { label:'Present',      value:summary.total_present, sc:'var(--green)' },
+            { label:'Absent',       value:summary.total_absent,  sc:'var(--red)'   },
+          ].map((s,i) => (
+            <div key={i} className="stat" style={{'--sc':s.sc}}>
+              <div className="stat-label">{s.label}</div>
+              <div className="stat-value" style={{fontSize:24}}>{s.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="tabs">
+        {[
+          ['summary', 'Summary'],
+          ['present', `Present (${present.length})`],
+          ['absent',  `Absent (${absent.length})`],
+        ].map(([id,label]) => (
+          <button key={id} className={`tab${tab === id ? ' active' : ''}`}
+            onClick={() => setTab(id)}>{label}</button>
+        ))}
+      </div>
+
+      {tab === 'summary' && (
+        <div className="card" style={{maxWidth:460}}>
+          <div className="card-title" style={{marginBottom:14}}>Attendance rate</div>
+          {summary && summary.total_booked > 0 ? (
+            <>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:8,fontSize:13}}>
+                <span>Present / booked</span>
+                <span style={{fontFamily:'var(--mono)',fontWeight:700,color: pct>=70?'var(--green)':pct>=40?'var(--amber)':'var(--red)'}}>{pct}%</span>
+              </div>
+              <div className="prog" style={{height:12,marginBottom:18}}>
+                <div className="prog-f" style={{width:pct+'%', background: pct>=70?'var(--green)':pct>=40?'var(--amber)':'var(--red)'}} />
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+                <div style={{background:'var(--green-l)',border:'1px solid var(--green-b)',borderRadius:10,padding:14,textAlign:'center'}}>
+                  <div style={{fontSize:22,fontWeight:700,color:'var(--green)',fontFamily:'var(--mono)'}}>{summary.total_present}</div>
+                  <div style={{fontSize:11,color:'var(--green)',marginTop:3}}>Present</div>
+                </div>
+                <div style={{background:'var(--red-l)',border:'1px solid var(--red-b)',borderRadius:10,padding:14,textAlign:'center'}}>
+                  <div style={{fontSize:22,fontWeight:700,color:'var(--red)',fontFamily:'var(--mono)'}}>{summary.total_absent}</div>
+                  <div style={{fontSize:11,color:'var(--red)',marginTop:3}}>Absent</div>
+                </div>
+              </div>
+            </>
+          ) : <div style={{color:'var(--text3)',fontSize:13,padding:'8px 0'}}>No bookings for this date and meal.</div>}
+        </div>
+      )}
+
+      {tab === 'present' && (
+        <div className="card">
+          <div className="card-hd">
+            <div className="card-title">Present students ({present.length})</div>
+            <button className="btn btn-outline btn-sm" onClick={() =>
+              csvDown([['Name','Reg no','Food pref','Scanned at'],...present.map(r=>[r.student_name,r.reg_no,r.food_pref||'',r.scanned_at||''])], 'present.csv')
+            }>⬇ CSV</button>
+          </div>
+          {loading && <div style={{padding:20,color:'var(--text3)'}}>Loading…</div>}
+          {!loading && (
+            <div className="tbl-wrap">
+              <table>
+                <thead><tr><th>Name</th><th>Reg no</th><th>Food pref</th><th>Scanned at</th></tr></thead>
+                <tbody>
+                  {present.length === 0 && <tr><td colSpan="4"><div className="empty"><div className="empty-ico">🍽</div><div className="empty-txt">No scans yet</div></div></td></tr>}
+                  {present.map(r => (
+                    <tr key={r.booking_id}>
+                      <td style={{fontWeight:600}}>{r.student_name}</td>
+                      <td className="mono">{r.reg_no}</td>
+                      <td>{r.food_pref || '—'}</td>
+                      <td className="mono">{r.scanned_at ? new Date(r.scanned_at).toLocaleTimeString('en-IN') : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'absent' && (
+        <div className="card">
+          <div className="card-hd">
+            <div className="card-title">Absent — booked but not scanned ({absent.length})</div>
+            <button className="btn btn-outline btn-sm" onClick={() =>
+              csvDown([['Name','Reg no','Food pref','Token'],...absent.map(r=>[r.student_name,r.reg_no,r.food_pref||'',r.token_number||''])], 'absent.csv')
+            }>⬇ CSV</button>
+          </div>
+          {loading && <div style={{padding:20,color:'var(--text3)'}}>Loading…</div>}
+          {!loading && (
+            <div className="tbl-wrap">
+              <table>
+                <thead><tr><th>Name</th><th>Reg no</th><th>Food pref</th><th>Token</th></tr></thead>
+                <tbody>
+                  {absent.length === 0 && <tr><td colSpan="4"><div className="empty"><div className="empty-ico">🎉</div><div className="empty-txt">Everyone showed up!</div></div></td></tr>}
+                  {absent.map(r => (
+                    <tr key={r.booking_id}>
+                      <td style={{fontWeight:600}}>{r.student_name}</td>
+                      <td className="mono">{r.reg_no}</td>
+                      <td>{r.food_pref || '—'}</td>
+                      <td className="mono" style={{fontSize:10,maxWidth:160,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.token_number}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ALL BOOKINGS
+// ═══════════════════════════════════════════════════════════════
+function Bookings({ token }) {
+  const [rows,    setRows]    = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [q,       setQ]       = useState('');
+  const [fStatus, setFStatus] = useState('all');
+  const [fMeal,   setFMeal]   = useState('all');
+
+  useEffect(() => {
+    // GET /api/booking/  no auth
+    // returns [{id,student_id,reg_no,food_pref,meal_type,date,status,token_number,name}]
+    apiFetch('GET', '/booking/', null, token).then(res => {
+      if (Array.isArray(res.data)) {
+        setRows(res.data);
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  const filtered = rows.filter(b => {
+    const ql = q.toLowerCase();
+    const mq = !q || (b.name||'').toLowerCase().includes(ql) || (b.reg_no||'').includes(q) || (b.token_number||'').includes(q);
+    const ms = fStatus === 'all' || b.status === fStatus;
+    const mm = fMeal   === 'all' || b.meal_type === fMeal;
+    return mq && ms && mm;
+  });
+
+  return (
+    <div className="page">
+      <div className="ph">
+        <div>
+          <div className="ph-title">All bookings</div>
+          <div className="ph-sub">{rows.length} total · {filtered.length} shown</div>
+        </div>
+        <button className="btn btn-outline btn-sm" onClick={() =>
+          csvDown([['ID','Student','Reg no','Meal','Food pref','Date','Status'],...filtered.map(b=>[b.id,b.name,b.reg_no,b.meal_type,b.food_pref,b.date,b.status])], 'bookings.csv')
+        }>⬇ Export CSV</button>
+      </div>
+      <div className="card">
+        <div style={{display:'flex',gap:10,marginBottom:16,flexWrap:'wrap'}}>
+          <input className="fi" placeholder="Search student, reg no or token…"
+            value={q} onChange={e => setQ(e.target.value)} style={{flex:1,minWidth:180}} />
+          <select className="fsel" value={fStatus} onChange={e => setFStatus(e.target.value)} style={{width:140}}>
+            <option value="all">All statuses</option>
+            <option value="active">Active</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select className="fsel" value={fMeal} onChange={e => setFMeal(e.target.value)} style={{width:140}}>
+            <option value="all">All meals</option>
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+          </select>
+        </div>
+        <div className="tbl-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Reg no</th><th>Meal</th><th>Food pref</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              {loading && <tr><td colSpan="6" style={{textAlign:'center',padding:28,color:'var(--text3)'}}>Loading…</td></tr>}
+              {!loading && filtered.length === 0 && <tr><td colSpan="6"><div className="empty"><div className="empty-ico">📅</div><div className="empty-txt">No bookings found</div></div></td></tr>}
+              {filtered.map(b => (
+                <tr key={b.id}>
+                  <td style={{fontWeight:600}}>{b.name}</td>
+                  <td className="mono">{b.reg_no}</td>
+                  <td><span className="badge bb" style={{textTransform:'capitalize'}}>{b.meal_type}</span></td>
+                  <td style={{color:'var(--text2)'}}>{b.food_pref || '—'}</td>
+                  <td className="mono">{b.date}</td>
+                  <td><span className={`badge ${b.status === 'active' ? 'bg' : 'br'}`}>{b.status}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ADMIN ACCOUNTS
+// ═══════════════════════════════════════════════════════════════
+function AdminAccounts({ token, toast, currentEmail }) {
+  const [rows,   setRows]   = useState([]);
+  const [loading,setLoading]= useState(true);
+  const [open,   setOpen]   = useState(false);
+  const [name,   setName]   = useState('');
+  const [email,  setEmail]  = useState('');
+  const [pass,   setPass]   = useState('');
+  const [confirm,setConfirm]= useState('');
+  const [errs,   setErrs]   = useState({});
+  const [saving, setSaving] = useState(false);
+  const [delId,  setDelId]  = useState(null);
+
+  function loadAdmins() {
+    // GET /api/admin/all  adminAuth → [{id,name,email,created_at}]
+    apiFetch('GET', '/admin/all', null, token).then(res => {
+      if (Array.isArray(res.data)) setRows(res.data);
+      setLoading(false);
+    });
+  }
+  useEffect(() => { loadAdmins(); }, [token]);
+
+  function closeModal() {
+    setOpen(false); setName(''); setEmail(''); setPass(''); setConfirm(''); setErrs({});
+  }
+  function validate() {
+    const e = {};
+    if (!name.trim())         e.name    = 'Required';
+    if (!email.trim())        e.email   = 'Required';
+    if (!pass)                e.pass    = 'Required';
+    else if (pass.length < 6) e.pass    = 'Min 6 characters';
+    if (pass !== confirm)     e.confirm = 'Passwords do not match';
+    setErrs(e);
+    return Object.keys(e).length === 0;
+  }
+
+  async function addAdmin() {
+    if (!validate()) return;
+    setSaving(true);
+    // POST /api/admin/register  no auth  body:{name,email,password}
+    // success → {id,name,email,created_at}
+    const res = await apiFetch('POST', '/admin/register', { name:name.trim(), email:email.trim(), password:pass });
+    if (res.ok && res.data.id) {
+      toast('✅', `Admin "${res.data.name}" added!`);
+      closeModal(); loadAdmins();
+    } else {
+      toast('❌', res.data.message || 'Failed to add admin');
+    }
+    setSaving(false);
+  }
+
+  async function deleteAdmin(id, aName) {
+    if (!window.confirm(`Delete admin "${aName}"? This cannot be undone.`)) return;
+    setDelId(id);
+    // DELETE /api/admin/:id  adminAuth → {message:"Admin deleted successfully"}
+    const res = await apiFetch('DELETE', '/admin/' + id, null, token);
+    if (res.ok || res.data.message?.includes('deleted')) {
+      toast('✅', 'Admin deleted');
+      loadAdmins();
+    } else {
+      toast('❌', res.data.message || 'Delete failed');
+    }
+    setDelId(null);
+  }
+
+  return (
+    <div className="page">
+      <div className="ph">
+        <div>
+          <div className="ph-title">Admin accounts</div>
+          <div className="ph-sub">{rows.length} admins</div>
+        </div>
+        <button className="btn btn-blue" onClick={() => setOpen(true)}>+ Add admin</button>
+      </div>
+      <div className="alert alert-warn" style={{marginBottom:18}}>Admin accounts have full portal access. Only add trusted users.</div>
+      <div className="card">
+        <div className="tbl-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Joined</th><th></th></tr></thead>
+            <tbody>
+              {loading && <tr><td colSpan="4" style={{textAlign:'center',padding:28,color:'var(--text3)'}}>Loading…</td></tr>}
+              {rows.map(a => (
+                <tr key={a.id}>
+                  <td>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      <div className="av" style={{width:30,height:30,background:'var(--blue-l)',color:'var(--blue)'}}>{initials(a.name)}</div>
+                      <span style={{fontWeight:600}}>{a.name}</span>
+                      {a.email === currentEmail && <span className="badge bb">you</span>}
+                    </div>
+                  </td>
+                  <td className="mono">{a.email}</td>
+                  <td className="mono">{fmtDate(a.created_at)}</td>
+                  <td>
+                    {a.email !== currentEmail && (
+                      <button className="btn btn-red btn-xs" onClick={() => deleteAdmin(a.id, a.name)} disabled={delId === a.id}>
+                        {delId === a.id ? '…' : '🗑'}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {open && (
+        <div className="overlay" onClick={e => e.target === e.currentTarget && closeModal()}>
+          <div className="modal">
+            <div className="modal-hd">
+              <div className="modal-title">Add admin account</div>
+              <button className="modal-close" onClick={closeModal}>×</button>
+            </div>
+            <div className="f2">
+              <div className="fg">
+                <label className="fl">Full name *</label>
+                <input className="fi" value={name} onChange={e=>setName(e.target.value)} placeholder="Admin name"/>
+                {errs.name && <span className="ferr">{errs.name}</span>}
+              </div>
+              <div className="fg">
+                <label className="fl">Email *</label>
+                <input className="fi" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="admin@klu.ac.in"/>
+                {errs.email && <span className="ferr">{errs.email}</span>}
+              </div>
+            </div>
+            <div className="f2">
+              <div className="fg">
+                <label className="fl">Password *</label>
+                <input className="fi" type="password" value={pass} onChange={e=>setPass(e.target.value)} placeholder="Min. 6 chars"/>
+                {errs.pass && <span className="ferr">{errs.pass}</span>}
+              </div>
+              <div className="fg">
+                <label className="fl">Confirm *</label>
+                <input className="fi" type="password" value={confirm} onChange={e=>setConfirm(e.target.value)} placeholder="Repeat"/>
+                {errs.confirm && <span className="ferr">{errs.confirm}</span>}
+              </div>
+            </div>
+            <hr/>
+            <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
+              <button className="btn btn-outline" onClick={closeModal}>Cancel</button>
+              <button className="btn btn-blue" onClick={addAdmin} disabled={saving}>{saving?'Adding…':'✓ Add admin'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ROOT APP
+// ═══════════════════════════════════════════════════════════════
+const PAGE_LABELS = {
+  dashboard: 'Dashboard',
+  students:  'Students',
+  staff:     'Staff',
+  emails:    'Allowed emails',
+  attendance:'Attendance',
+  bookings:  'Bookings',
+  admins:    'Admin accounts',
+};
+
+const NAV_ITEMS = [
+  { id:'dashboard', label:'Dashboard',      icon:<svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><rect x="1" y="1" width="5.5" height="5.5" rx="1.5"/><rect x="8.5" y="1" width="5.5" height="5.5" rx="1.5"/><rect x="1" y="8.5" width="5.5" height="5.5" rx="1.5"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1.5"/></svg> },
+  { id:'students',  label:'Students',        icon:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="7.5" cy="5" r="2.5"/><path d="M2 13c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/></svg> },
+  { id:'staff',     label:'Staff',           icon:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="5" cy="5" r="2"/><circle cx="11" cy="5" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4"/><path d="M14 13c0-2.2-1.8-4-4-4"/><path d="M5 9c0-2.2 1.3-3.5 2.5-3.5S10 6.8 10 9"/></svg> },
+  { id:'emails',    label:'Allowed emails',  icon:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.4"><rect x="1" y="3" width="13" height="9" rx="1.5"/><path d="M1 4.5l6.5 5 6.5-5"/></svg> },
+  { id:'attendance',label:'Attendance',      icon:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.4"><rect x="1" y="2" width="13" height="11" rx="1.5"/><path d="M4.5 7.5l2 2 3.5-3.5"/><path d="M1 5.5h13"/></svg> },
+  { id:'bookings',  label:'Bookings',        icon:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.4"><rect x="1" y="2" width="13" height="11" rx="1.5"/><path d="M5 1v3M10 1v3M1 6.5h13"/></svg> },
+  { id:'admins',    label:'Admin accounts',  icon:<svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="7.5" cy="7.5" r="2"/><path d="M7.5 1v1.5M7.5 12V13.5M1 7.5h1.5M12 7.5h1.5M2.9 2.9l1 1M11.1 11.1l1 1M11.1 2.9l-1 1M3.9 11.1l-1 1"/></svg> },
+];
+
+function App() {
+  const [token, setToken] = useState(() => localStorage.getItem('klu_admin_token'));
+  const [admin, setAdmin] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('klu_admin_info') || 'null'); } catch { return null; }
+  });
+  const [page, setPage] = useState('dashboard');
+  const [toasts, toast] = useToast();
+  const [showApiConfig, setShowApiConfig] = useState(false);
+
+  function onLogin(tok, payload) {
+    setToken(tok);
+    setAdmin(payload);
+    localStorage.setItem('klu_admin_token', tok);
+    localStorage.setItem('klu_admin_info',  JSON.stringify(payload));
+  }
+
+  function logout() {
+    setToken(null); setAdmin(null);
+    localStorage.removeItem('klu_admin_token');
+    localStorage.removeItem('klu_admin_info');
+  }
+
+  if (!token) return <Login onLogin={onLogin} />;
+
+  function renderPage() {
+    switch (page) {
+      case 'dashboard':  return <Dashboard   token={token} />;
+      case 'students':   return <Students    token={token} />;
+      case 'staff':      return <Staff       token={token} toast={toast} />;
+      case 'emails':     return <AllowedEmails token={token} toast={toast} />;
+      case 'attendance': return <Attendance  token={token} />;
+      case 'bookings':   return <Bookings    token={token} />;
+      case 'admins':     return <AdminAccounts token={token} toast={toast} currentEmail={admin?.email} />;
+      default:           return null;
+    }
+  }
+
+  return (
+    <div className="layout">
+      {/* ── SIDEBAR ── */}
+      <aside className="sidebar">
+        <div className="sb-logo">
+          <div className="sb-chip">ADMIN</div>
+          <div className="sb-name">KLU Hostel</div>
+          <div className="sb-tagline">Admin portal</div>
+        </div>
+
+        <nav className="sb-nav">
+          <div className="sb-group">Main</div>
+          {NAV_ITEMS.map(n => (
+            <button
+              key={n.id}
+              className={`sb-item${page === n.id ? ' active' : ''}`}
+              onClick={() => setPage(n.id)}
+            >
+              {n.icon}
+              {n.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="sb-foot">
+          <div className="sb-user">
+            <div className="sb-av">{initials(admin?.name || admin?.email || 'A')}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div className="sb-uname">{admin?.name || admin?.email || 'Admin'}</div>
+              <div className="sb-urole">administrator</div>
+            </div>
+            <button className="sb-logout" onClick={logout} title="Sign out">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M5 2H2a1 1 0 00-1 1v8a1 1 0 001 1h3M9 10l3-3-3-3M12 7H5"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* ── MAIN ── */}
+      <div className="main">
+        <div className="topbar">
+          <div className="topbar-title">{PAGE_LABELS[page]}</div>
+          <div className="topbar-right">
+            <ConnDot onConfigure={() => setShowApiConfig(true)} />
+          </div>
+        </div>
+        <div className="page-wrap">
+          {renderPage()}
+        </div>
+      </div>
+
+      <ToastContainer toasts={toasts} />
+      {showApiConfig && <ApiConfig onClose={() => setShowApiConfig(false)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
